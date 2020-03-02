@@ -17,6 +17,8 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import java.util.Collections;
+import java.util.Map;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -79,8 +81,10 @@ public class BrewPushCli extends AbstractCommand {
         }
 
         @Override
-        public String exampleText() {
-            return "$ java -jar bacon.jar brew-push build 8 --tag-prefix=\"1.0-pnc\" --reimport=false";
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap(
+                    "Push build with id 8 to tag 1.0-pnc:",
+                    "pnc brew-push build 8 --tag-prefix=\"1.0-pnc\" --reimport=false");
         }
     }
 
@@ -104,8 +108,10 @@ public class BrewPushCli extends AbstractCommand {
         }
 
         @Override
-        public String exampleText() {
-            return "$ java -jar bacon.jar brew-push group-build 8 --tag-prefix=\"1.0-pnc\"";
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap(
+                    "Push all builds in group with id 8 to tag 1.0-pnc:",
+                    "$ java -jar bacon.jar brew-push group-build 8 --tag-prefix=\"1.0-pnc\"");
         }
     }
 

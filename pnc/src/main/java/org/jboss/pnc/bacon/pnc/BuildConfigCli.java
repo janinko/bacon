@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.bacon.pnc;
 
+import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
@@ -25,7 +26,6 @@ import org.aesh.command.GroupCommandDefinition;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
-import org.jboss.pnc.bacon.common.Fail;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.bacon.common.cli.AbstractCommand;
 import org.jboss.pnc.bacon.common.cli.AbstractGetSpecificCommand;
@@ -43,9 +43,9 @@ import org.jboss.pnc.dto.ProjectRef;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.enums.BuildType;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.aesh.command.option.OptionGroup;
 
 @GroupCommandDefinition(
         name = "build-config",
@@ -76,8 +76,8 @@ public class BuildConfigCli extends AbstractCommand {
         private String scmRepositoryId;
         @Option(required = true, name = "scm-revision", description = "SCM Revision")
         private String scmRevision;
-        @Option(name = "generic-parameters", description = "Generic parameters. Format: KEY=VALUE,KEY=VALUE")
-        private String genericParameters;
+        @OptionGroup(name = "generic-parameter", description = "Generic parameter. Format: KEY=VALUE")
+        private Map<String, String> genericParameters;
         @Option(name = "product-version-id", description = "Product Version ID")
         private String productVersionId;
         @Option(
@@ -107,7 +107,7 @@ public class BuildConfigCli extends AbstractCommand {
                         .scmRepository(SCMRepository.builder().id(scmRepositoryId).build())
                         .scmRevision(scmRevision)
                         .buildType(BuildType.valueOf(buildType))
-                        .parameters(processGenericParameters(genericParameters));
+                        .parameters(genericParameters);
 
                 ObjectHelper.executeIfNotNull(
                         productVersionId,
@@ -121,14 +121,14 @@ public class BuildConfigCli extends AbstractCommand {
         }
 
         @Override
-        public String exampleText() {
+        public Map<String, String> exampleText() {
             StringBuilder builder = new StringBuilder();
-            builder.append("$ java -jar bacon.jar pnc build-config create \\ \n")
+            builder.append("pnc build-config create \\ \n")
                     .append("\t--environment-id=100 --project-id=164 --build-script \"mvn clean deploy\" \\ \n")
                     .append("\t--scm-repository-id 176 --scm-revision master \\ \n")
-                    .append("\t--generic-parameters \"TEST=TRUE,CUSTOM_PME_PARAMETERS=-Dignore=true\" \\ \n")
-                    .append("\t--build-type MVN buildconfigname");
-            return builder.toString();
+                    .append("\t--generic-parameter=\"CUSTOM_PME_PARAMETERS=-Dignore=true\" \\ \n")
+                    .append("\t--generic-parameter=\"TEST=TRUE\" --build-type MVN buildconfigname");
+            return Collections.singletonMap("Create new build config:", builder.toString());
         }
     }
 
@@ -151,8 +151,8 @@ public class BuildConfigCli extends AbstractCommand {
         private String scmRepositoryId;
         @Option(required = true, name = "scm-revision", description = "SCM Revision")
         private String scmRevision;
-        @Option(name = "generic-parameters", description = "Generic parameters. Format: KEY=VALUE,KEY=VALUE")
-        private String genericParameters;
+        @OptionGroup(name = "generic-parameter", description = "Generic parameter. Format: KEY=VALUE")
+        private Map<String, String> genericParameters;
         @Option(name = "build-type", description = "Build Type. Options are: Maven,Gradle. Default: Maven")
         private String buildType;
 
@@ -175,9 +175,7 @@ public class BuildConfigCli extends AbstractCommand {
                         scmRepositoryId,
                         () -> updated.scmRepository(SCMRepository.builder().id(scmRepositoryId).build()));
                 ObjectHelper.executeIfNotNull(scmRevision, () -> updated.scmRevision(scmRevision));
-                ObjectHelper.executeIfNotNull(
-                        genericParameters,
-                        () -> updated.parameters(processGenericParameters(genericParameters)));
+                ObjectHelper.executeIfNotNull(genericParameters, () -> updated.parameters(genericParameters));
                 ObjectHelper.executeIfNotNull(buildType, () -> updated.buildType(BuildType.valueOf(buildType)));
 
                 CREATOR.getClientAuthenticated().update(buildConfigId, updated.build());
@@ -216,33 +214,4 @@ public class BuildConfigCli extends AbstractCommand {
         }
     }
 
-    private static Map<String, String> processGenericParameters(String genericParameters) {
-
-        if (genericParameters == null) {
-            return null;
-        } else {
-
-            Map<String, String> params = new LinkedHashMap<>();
-
-            for (String keyValue : genericParameters.split(",")) {
-
-                keyValue = keyValue.trim();
-
-                if (keyValue.contains("=")) {
-                    String[] keyValueResult = keyValue.split("=");
-                    if (keyValueResult.length == 2) {
-                        log.debug(
-                                "Adding parameter with key: '{}' and value: '{}'",
-                                keyValueResult[0],
-                                keyValueResult[1]);
-                        params.put(keyValueResult[0], keyValueResult[1]);
-                    } else {
-                        log.error("Generic parameter format is in the form: KEY1=VALUE1,KEY2=VALUE2");
-                        Fail.fail("Invalid format in the generic parameters: " + genericParameters);
-                    }
-                }
-            }
-            return params;
-        }
-    }
 }

@@ -19,6 +19,7 @@ package org.jboss.pnc.bacon.common.cli;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ch.qos.logback.classic.Level;
+import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.aesh.command.Command;
 import org.aesh.command.CommandException;
@@ -33,7 +34,7 @@ import org.jboss.pnc.bacon.config.Config;
 import org.jboss.pnc.bacon.common.exception.FatalException;
 import org.jboss.pnc.client.ClientException;
 
-import java.io.IOException;
+import java.util.Map;
 
 /**
  * Abstract command that implements Command
@@ -70,10 +71,16 @@ public class AbstractCommand implements Command {
 
         if (help) {
             shell.writeln(commandInvocation.getHelpInfo());
-            String exampleText = exampleText();
-            if (exampleText != null) {
+            Map<String, String> examples = exampleText();
+            if (!examples.isEmpty()) {
                 shell.writeln("Examples:\n");
-                shell.writeln(exampleText);
+                for (Map.Entry<String, String> e : examples.entrySet()) {
+                    String description = e.getKey();
+                    String example = e.getValue();
+                    shell.writeln("\t" + description);
+                    shell.writeln("\t\t$ java -jar bacon.jar " + example.replace("\n", "\n\t\t"));
+                    shell.writeln("");
+                }
             }
             activated = true;
         }
@@ -217,12 +224,12 @@ public class AbstractCommand implements Command {
      *
      *
      * Example:
-     *
-     * <exampleText stuff>
      * 
-     * @return
+     * <description> $ java -jar bacon.jar <example text>
+     * 
+     * @return Map of description:example entries.
      */
-    public String exampleText() {
-        return null;
+    public Map<String, String> exampleText() {
+        return Collections.emptyMap();
     }
 }
