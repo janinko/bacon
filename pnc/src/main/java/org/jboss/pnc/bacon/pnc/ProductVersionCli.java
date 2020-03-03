@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -42,13 +43,16 @@ import org.jboss.pnc.dto.ProductRef;
 import org.jboss.pnc.dto.ProductRelease;
 import org.jboss.pnc.dto.ProductVersion;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @GroupCommandDefinition(
         name = "product-version",
         description = "Product Version",
         groupCommands = { ProductVersionCli.Create.class, ProductVersionCli.Get.class, ProductVersionCli.Update.class,
-                ProductVersionCli.ListBuildConfigurations.class, ProductVersionCli.ListGroupConfigurations.class,
+                ProductVersionCli.ListBuildConfigs.class, ProductVersionCli.ListGroupConfigs.class,
                 ProductVersionCli.ListMilestones.class, ProductVersionCli.ListReleases.class })
 @Slf4j
 public class ProductVersionCli extends AbstractCommand {
@@ -91,6 +95,12 @@ public class ProductVersionCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(productVersion));
             });
         }
+
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap("Create new product version for product with id 8:", "pnc product-version create --product-id 8 1.0");
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get product version")
@@ -108,9 +118,9 @@ public class ProductVersionCli extends AbstractCommand {
     }
 
     @CommandDefinition(
-            name = "list-build-configurations",
+            name = "list-build-configs",
             description = "List Build configurations for a particular product version")
-    public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
+    public class ListBuildConfigs extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(required = true, description = "Product version id")
         private String id;
@@ -121,12 +131,19 @@ public class ProductVersionCli extends AbstractCommand {
             return CREATOR.getClient()
                     .getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap(
+                    "List all build configs in product version with id 8:",
+                    "pnc product-version list-build-configs 8");
+        }
     }
 
     @CommandDefinition(
-            name = "list-group-configurations",
+            name = "list-group-configs",
             description = "List Group configurations for a particular product version")
-    public class ListGroupConfigurations extends AbstractListCommand<GroupConfiguration> {
+    public class ListGroupConfigs extends AbstractListCommand<GroupConfiguration> {
 
         @Argument(required = true, description = "Product version id")
         private String id;
@@ -136,6 +153,13 @@ public class ProductVersionCli extends AbstractCommand {
 
             return CREATOR.getClient()
                     .getGroupConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap(
+                    "List all group configs in product version with id 8:",
+                    "pnc product-version list-group-configs 8");
         }
     }
 
@@ -151,6 +175,13 @@ public class ProductVersionCli extends AbstractCommand {
 
             return CREATOR.getClient().getMilestones(id, Optional.ofNullable(sort), Optional.ofNullable(query));
         }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap(
+                    "List all milestones in product version with id 8:",
+                    "pnc product-version list-milestones 8");
+        }
     }
 
     @CommandDefinition(name = "list-releases", description = "List releases for a particular product version")
@@ -163,6 +194,13 @@ public class ProductVersionCli extends AbstractCommand {
         public RemoteCollection<ProductRelease> getAll(String sort, String query) throws RemoteResourceException {
 
             return CREATOR.getClient().getReleases(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap(
+                    "List all releases in product version with id 8:",
+                    "pnc product-version list-releases 8");
         }
     }
 
@@ -193,6 +231,11 @@ public class ProductVersionCli extends AbstractCommand {
                 });
                 CREATOR.getClientAuthenticated().update(id, updated.build());
             });
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap("Set new version for product version with id 8:", "pnc product-version update --product-version \"2.0\" 8");
         }
     }
 

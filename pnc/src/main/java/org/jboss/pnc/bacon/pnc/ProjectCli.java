@@ -37,6 +37,9 @@ import org.jboss.pnc.dto.Build;
 import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.Project;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @GroupCommandDefinition(
@@ -82,6 +85,16 @@ public class ProjectCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(project));
             });
         }
+
+        @Override
+        public Map<String, String> exampleText() {
+            Map<String, String> examples = new LinkedHashMap<>();
+            examples.put("Create new project:", "pnc project create \"New Project Name\"");
+            examples.put(
+                    "Create new project with description and project url:",
+                    "pnc project create --description \"Project description\" --project-url \"https://example.com/\" \"New Project Name\"");
+            return examples;
+        }
     }
 
     @CommandDefinition(name = "get", description = "Get a project")
@@ -105,9 +118,19 @@ public class ProjectCli extends AbstractCommand {
         public RemoteCollection<Project> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient().getAll(Optional.ofNullable(sort), Optional.ofNullable(query));
         }
+
+        @Override
+        public Map<String, String> exampleText() {
+            Map<String, String> examples = new LinkedHashMap<>();
+            examples.put("List all projects:", "pnc project list");
+            examples.put(
+                    "List all projects that have 'Foo' in their description:",
+                    "pnc project list --query \"description=LIKE=*Foo*\"");
+            return examples;
+        }
     }
 
-    @CommandDefinition(name = "list-build-configurations", description = "List build configurations for a project")
+    @CommandDefinition(name = "list-build-configs", description = "List build configurations for a project")
     public class ListBuildConfigurations extends AbstractListCommand<BuildConfiguration> {
 
         @Argument(required = true, description = "Project id")
@@ -117,6 +140,11 @@ public class ProjectCli extends AbstractCommand {
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient()
                     .getBuildConfigurations(id, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap("List all build configs in project with id 8:", "pnc project list-build-configs 8");
         }
     }
 
@@ -162,6 +190,11 @@ public class ProjectCli extends AbstractCommand {
 
                 CREATOR.getClientAuthenticated().update(id, updated.build());
             });
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap("Set new description for project with id 8:", "pnc project update --description \"New description\" 8");
         }
     }
 }

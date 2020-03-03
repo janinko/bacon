@@ -37,6 +37,9 @@ import org.jboss.pnc.dto.BuildConfiguration;
 import org.jboss.pnc.dto.SCMRepository;
 import org.jboss.pnc.dto.requests.CreateAndSyncSCMRequest;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @GroupCommandDefinition(
@@ -54,8 +57,8 @@ public class ScmRepositoryCli extends AbstractCommand {
         @Argument(required = true, description = "SCM URL")
         private String scmUrl;
 
-        @Option(name = "pre-build-sync", description = "Pre-build-sync feature: Default: true", defaultValue = "true")
-        private String preBuildSync;
+        @Option(name = "disable-pre-build-sync", description = "Disable the pre-build sync of external repo.", hasValue = false)
+        private boolean preBuildSyncDisabled;
 
         @Option(
                 shortName = 'o',
@@ -70,12 +73,21 @@ public class ScmRepositoryCli extends AbstractCommand {
 
             return super.executeHelper(commandInvocation, () -> {
                 CreateAndSyncSCMRequest createAndSyncSCMRequest = CreateAndSyncSCMRequest.builder()
-                        .preBuildSyncEnabled(Boolean.valueOf(preBuildSync))
+                        .preBuildSyncEnabled(!preBuildSyncDisabled)
                         .scmUrl(scmUrl)
                         .build();
 
                 ObjectHelper.print(jsonOutput, CREATOR.getClientAuthenticated().createNew(createAndSyncSCMRequest));
             });
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            Map<String, String> examples = new LinkedHashMap<>();
+            examples.put("Create repository with internal URL:", "pnc scm-repository create-and-sync \"git+ssh://internal.example.com/some/project.git\"");
+            examples.put("Create repository with external URL:", "pnc scm-repository create-and-sync \"https://external.example.com/some/project.git\"");
+            examples.put("Create repository with external URL and disabled pre-build sync:", "pnc scm-repository create-and-sync --disable-pre-build-sync \"https://external.example.com/some/project.git\"");
+            return examples;
         }
     }
 
@@ -96,16 +108,29 @@ public class ScmRepositoryCli extends AbstractCommand {
     @CommandDefinition(name = "list", description = "List repositories")
     public class List extends AbstractListCommand<SCMRepository> {
 
-        @Option(description = "Exact URL to search")
+        @Option(name = "match-url", description = "Exact URL to search")
         private String matchUrl;
 
-        @Option(description = "Part of the URL to search")
+        @Option(name = "search-url", description = "Part of the URL to search")
         private String searchUrl;
 
         @Override
         public RemoteCollection<SCMRepository> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient()
                     .getAll(matchUrl, searchUrl, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            Map<String, String> examples = new LinkedHashMap<>();
+            examples.put("List all SCM Repositories:", "pnc scm-repository list");
+            examples.put(
+                    "List all SCM Repositories of project-ncl github organization:",
+                    "pnc scm-repository list --search-url \"github.com/project-ncl\"");
+            examples.put(
+                    "Get SCM Repository of Bacon in project-ncl github organization:",
+                    "pnc scm-repository list --match-url \"https://github.com/project-ncl/bacon.git\"");
+            return examples;
         }
     }
 
@@ -121,6 +146,11 @@ public class ScmRepositoryCli extends AbstractCommand {
         public RemoteCollection<BuildConfiguration> getAll(String sort, String query) throws RemoteResourceException {
             return CREATOR.getClient()
                     .getBuildsConfigs(scmRepositoryId, Optional.ofNullable(sort), Optional.ofNullable(query));
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap("List all build configs having SCM Repository with id 8:", "pnc scm-repository list-build-configs 8");
         }
     }
 }

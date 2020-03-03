@@ -229,8 +229,8 @@ public abstract class AbstractCommand implements Command {
      * 
      * @return Map of description:example entries.
      */
-    public Map<String, String> exampleText() {
+    public abstract Map<String, String> exampleText() ;/*{
         return Collections.emptyMap();
-    }
+    }*/
 
 }
