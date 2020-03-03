@@ -1,6 +1,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -14,6 +15,9 @@ import org.jboss.pnc.bacon.pnc.common.ClientCreator;
 import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.dto.Artifact;
+
+import java.util.Collections;
+import java.util.Map;
 
 @Slf4j
 @GroupCommandDefinition(
@@ -31,6 +35,12 @@ public class ArtifactCli extends AbstractCommand {
         public Artifact getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "artifact";
+        }
+
     }
 
     @CommandDefinition(name = "list-from-hash", description = "List artifacts based on hash")
@@ -64,6 +74,13 @@ public class ArtifactCli extends AbstractCommand {
                     ObjectHelper.print(jsonOutput, CREATOR.getClient().getAll(sha256, md5, sha1));
                 }
             });
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap(
+                    "Get artifacts with md5 hash:",
+                    "pnc artifact list-from-hash --md5 11375ca962e994c09d7d745e24c8ad35");
         }
     }
 }

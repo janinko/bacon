@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.common.cli;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
 import org.aesh.command.invocation.CommandInvocation;
@@ -25,6 +26,9 @@ import org.aesh.command.option.Argument;
 import org.aesh.command.option.Option;
 import org.jboss.pnc.bacon.common.ObjectHelper;
 import org.jboss.pnc.client.ClientException;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Class used to get specific item from PNC. The subclass only has to implement 'getSpecific' to teach it how to
@@ -53,5 +57,13 @@ public abstract class AbstractGetSpecificCommand<T> extends AbstractCommand {
         });
     }
 
+    @Override
+    public Map<String, String> exampleText() {
+        return Collections
+                .singletonMap("Get specific " + entityName() + " with id 8:", "pnc " + entityName() + " get 8");
+    }
+
     public abstract T getSpecific(String id) throws ClientException;
+
+    protected abstract String entityName();
 }

@@ -103,6 +103,11 @@ public class ProductCli extends AbstractCommand {
         public Product getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "product";
+        }
     }
 
     @CommandDefinition(name = "list", description = "List products")

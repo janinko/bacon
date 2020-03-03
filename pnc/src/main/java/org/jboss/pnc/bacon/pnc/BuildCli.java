@@ -18,6 +18,7 @@
 package org.jboss.pnc.bacon.pnc;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
 import org.aesh.command.CommandResult;
@@ -41,6 +42,7 @@ import org.jboss.pnc.enums.RebuildMode;
 import org.jboss.pnc.rest.api.parameters.BuildParameters;
 
 import javax.ws.rs.core.Response;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +51,10 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @GroupCommandDefinition(
@@ -74,12 +80,18 @@ public class BuildCli extends AbstractCommand {
                 name = "rebuild-mode",
                 description = "Default: IMPLICIT_DEPENDENCY_CHECK. Other options are: EXPLICIT_DEPENDENCY_CHECK, FORCE")
         private String rebuildMode;
-        @Option(name = "keep-pod-on-failure", description = "Default: false", defaultValue = "false")
-        private String keepPodOnFailure;
-        @Option(name = "timestamp-alignment", description = "Default: false", defaultValue = "false")
-        private String timestampAlignment;
-        @Option(name = "temporary-build", description = "Temporary build, default: false", defaultValue = "false")
-        private String temporaryBuild;
+        @Option(
+                name = "keep-pod-on-failure",
+                description = "Keep the builder pod online after failure.",
+                hasValue = false)
+        private boolean keepPodOnFailure;
+        @Option(
+                name = "timestamp-alignment",
+                description = "Use timestamp alignment in temporary build.",
+                hasValue = false)
+        private boolean timestampAlignment;
+        @Option(name = "temporary-build", description = "Start the build as a temporary build.", hasValue = false)
+        private boolean temporaryBuild;
         @Option(
                 shortName = 'o',
                 overrideRequired = false,
@@ -101,9 +113,9 @@ public class BuildCli extends AbstractCommand {
             checkRebuildModeOption(rebuildMode);
 
             buildParams.setRebuildMode(RebuildMode.valueOf(rebuildMode));
-            buildParams.setKeepPodOnFailure(Boolean.parseBoolean(keepPodOnFailure));
-            buildParams.setTimestampAlignment(Boolean.parseBoolean(timestampAlignment));
-            buildParams.setTemporaryBuild(Boolean.parseBoolean(temporaryBuild));
+            buildParams.setKeepPodOnFailure(keepPodOnFailure);
+            buildParams.setTimestampAlignment(timestampAlignment);
+            buildParams.setTemporaryBuild(temporaryBuild);
 
             return super.executeHelper(commandInvocation, () -> {
                 ObjectHelper.print(jsonOutput, BC_CREATOR.getClientAuthenticated().trigger(buildConfigId, buildParams));
@@ -122,6 +134,19 @@ public class BuildCli extends AbstractCommand {
                 throw new FatalException();
             }
         }
+
+        @Override
+        public Map<String, String> exampleText() {
+            Map<String, String> examples = new LinkedHashMap<>();
+            examples.put("Start a new build of build config with id 8:", "pnc build start 8");
+            examples.put(
+                    "Start a new temporary build with timestamp alignment:",
+                    "pnc build start --temporary-build --timestamp-alignment 8");
+            examples.put(
+                    "Forece a new build even if it was already built before:",
+                    "pnc build start --rebuild-mode FORCE 8");
+            return examples;
+        }
     }
 
     @CommandDefinition(name = "cancel", description = "Cancel build")
@@ -137,6 +162,11 @@ public class BuildCli extends AbstractCommand {
             return super.executeHelper(commandInvocation, () -> {
                 CREATOR.getClientAuthenticated().cancel(buildId);
             });
+        }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap("Cancel running build with id 5314", "pnc build cancel 5314");
         }
     }
 
@@ -182,6 +212,12 @@ public class BuildCli extends AbstractCommand {
         public Build getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "build";
+        }
+
     }
 
     @CommandDefinition(name = "get-log", description = "Get build log.")

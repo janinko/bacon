@@ -90,5 +90,10 @@ public class GroupBuildCli extends AbstractCommand {
         public GroupBuild getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "group-build";
+        }
     }
 }

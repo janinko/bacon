@@ -137,5 +137,10 @@ public class BrewPushCli extends AbstractCommand {
                 ObjectHelper.print(jsonOutput, BUILD_CREATOR.getClient().getPushResult(id));
             });
         }
+
+        @Override
+        public Map<String, String> exampleText() {
+            return Collections.singletonMap("Get the status of Brew Push of build 8:", "pnc brew-push status 8");
+        }
     }
 }

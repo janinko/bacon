@@ -46,6 +46,11 @@ public class EnvironmentCli extends AbstractCommand {
         public Environment getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "environment";
+        }
     }
 
     @CommandDefinition(name = "list", description = "List environments")

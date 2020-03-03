@@ -45,7 +45,7 @@ import java.util.Map;
  * the lambda otherwise
  */
 @Slf4j
-public class AbstractCommand implements Command {
+public abstract class AbstractCommand implements Command {
 
     public interface SubCommandExecuteInterface {
         void call() throws ClientException, JsonProcessingException;
@@ -232,4 +232,5 @@ public class AbstractCommand implements Command {
     public Map<String, String> exampleText() {
         return Collections.emptyMap();
     }
+
 }

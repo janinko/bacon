@@ -86,6 +86,11 @@ public class ScmRepositoryCli extends AbstractCommand {
         public SCMRepository getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "scm-repository";
+        }
     }
 
     @CommandDefinition(name = "list", description = "List repositories")

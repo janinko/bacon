@@ -193,6 +193,11 @@ public class ProductMilestoneCli extends AbstractCommand {
         public ProductMilestone getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "product-milestone";
+        }
     }
 
     @CommandDefinition(name = "list-performed-builds", description = "List performed builds")

@@ -100,6 +100,11 @@ public class ProductVersionCli extends AbstractCommand {
         public ProductVersion getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "product-version";
+        }
     }
 
     @CommandDefinition(

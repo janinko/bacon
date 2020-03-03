@@ -190,6 +190,11 @@ public class BuildConfigCli extends AbstractCommand {
         public BuildConfiguration getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "build-config";
+        }
     }
 
     @CommandDefinition(name = "list", description = "List build configurations")

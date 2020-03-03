@@ -176,6 +176,11 @@ public class ProductReleaseCli extends AbstractCommand {
         public ProductRelease getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "product-release";
+        }
     }
 
     @CommandDefinition(name = "list-support-levels", description = "List supported levels")

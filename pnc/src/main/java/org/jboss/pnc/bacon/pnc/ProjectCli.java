@@ -91,6 +91,11 @@ public class ProjectCli extends AbstractCommand {
         public Project getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "project";
+        }
     }
 
     @CommandDefinition(name = "list", description = "List projects")

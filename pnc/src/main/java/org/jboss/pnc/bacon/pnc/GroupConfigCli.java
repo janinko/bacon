@@ -143,6 +143,11 @@ public class GroupConfigCli extends AbstractCommand {
         public GroupConfiguration getSpecific(String id) throws ClientException {
             return CREATOR.getClient().getSpecific(id);
         }
+
+        @Override
+        protected String entityName() {
+            return "group-config";
+        }
     }
 
     @CommandDefinition(name = "list", description = "List group configurations")
